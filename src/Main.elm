@@ -1,7 +1,7 @@
 module Main exposing (..)
 
-import Html exposing (text, Html, nav, i, a, li, div, input, form, b, p, h5)
-import Html.Attributes exposing (class, attribute, href, type', placeholder, id, name)
+import Html exposing (text, Html, nav, i, a, li, div, input, form, b, p, h5, h6, span, ul, img, h4)
+import Html.Attributes exposing (class, attribute, href, type', placeholder, id, name, target, src)
 import Html.Events exposing (onInput)
 import Html.App as App
 import Http
@@ -31,6 +31,12 @@ type alias Credentials =
 type alias GithubProfile =
     { name : String
     , repos_url : String
+    , avatar_url : String
+    , login : String
+    , location : String
+    , email : String
+    , blog : String
+    , created_at : String
     }
 
 
@@ -77,9 +83,15 @@ fetchGithubUserUrl name credentials =
 
 profileDecoder : Decode.Decoder (GithubProfile)
 profileDecoder =
-    Decode.object2 GithubProfile
+    Decode.object8 GithubProfile
         ("name" := Decode.string)
         ("repos_url" := Decode.string)
+        ("avatar_url" := Decode.string)
+        ("login" := Decode.string)
+        ("created_at" := Decode.string)
+        ("location" := Decode.string)
+        ("email" := Decode.string)
+        ("blog" := Decode.string)
 
 
 view : Model -> Html Msg
@@ -123,8 +135,54 @@ profile model =
                         ]
 
                 Just profile ->
-                    div []
-                        [ h5 [] [ text profile.name ]
+                    div [ class "row" ]
+                        [ div [ class "col-md-5" ]
+                            [ div []
+                                [ div [ class "card" ]
+                                    [ h4 [ class "card-header" ]
+                                        [ text profile.name ]
+                                    , div [ class "card-block" ]
+                                        [ div [ class "row" ]
+                                            [ div [ class "col-xl-4 m-b-1" ]
+                                                [ img [ class "profile-img img-thumbnail m-b-1", src profile.avatar_url ]
+                                                    []
+                                                , a [ class "btn btn-sm btn-outline-primary btn-block m-t-1", href profile.name, target "_blank" ]
+                                                    [ text "View Profile" ]
+                                                ]
+                                            , div [ class "col-xl-8" ]
+                                                [ ul [ class "list-group" ]
+                                                    [ li [ class "list-group-item" ]
+                                                        [ b []
+                                                            [ text "Username: " ]
+                                                        , text profile.login
+                                                        ]
+                                                    , li [ class "list-group-item" ]
+                                                        [ b []
+                                                            [ text "Location: " ]
+                                                        , text profile.location
+                                                        ]
+                                                    , li [ class "list-group-item" ]
+                                                        [ b []
+                                                            [ text "E-Mail: " ]
+                                                        , text profile.email
+                                                        ]
+                                                    , li [ class "list-group-item" ]
+                                                        [ b []
+                                                            [ text "Blog Link: " ]
+                                                        , text profile.blog
+                                                        ]
+                                                    , li [ class "list-group-item" ]
+                                                        [ b []
+                                                            [ text "Member Since: " ]
+                                                        , text profile.created_at
+                                                        ]
+                                                    ]
+                                                ]
+                                            ]
+                                        ]
+                                    ]
+                                ]
+                            ]
                         ]
 
 
