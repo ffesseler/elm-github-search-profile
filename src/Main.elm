@@ -5,7 +5,8 @@ import Html.Attributes exposing (class, attribute, href, type', placeholder, id,
 import Html.Events exposing (onInput)
 import Html.App as App
 import Http
-import Json.Decode as Decode exposing ((:=))
+import Json.Decode as Decode
+import Json.Decode.Pipeline exposing (required, decode)
 import Task
 import String exposing (length)
 
@@ -37,6 +38,7 @@ type alias GithubProfile =
     , email : String
     , blog : String
     , created_at : String
+    , html_url : String
     }
 
 
@@ -83,15 +85,16 @@ fetchGithubUserUrl name credentials =
 
 profileDecoder : Decode.Decoder (GithubProfile)
 profileDecoder =
-    Decode.object8 GithubProfile
-        ("name" := Decode.string)
-        ("repos_url" := Decode.string)
-        ("avatar_url" := Decode.string)
-        ("login" := Decode.string)
-        ("created_at" := Decode.string)
-        ("location" := Decode.string)
-        ("email" := Decode.string)
-        ("blog" := Decode.string)
+    decode GithubProfile
+        |> required "name" Decode.string
+        |> required "repos_url" Decode.string
+        |> required "avatar_url" Decode.string
+        |> required "login" Decode.string
+        |> required "created_at" Decode.string
+        |> required "location" Decode.string
+        |> required "email" Decode.string
+        |> required "blog" Decode.string
+        |> required "html_url" Decode.string
 
 
 view : Model -> Html Msg
@@ -146,7 +149,7 @@ profile model =
                                             [ div [ class "col-xl-4 m-b-1" ]
                                                 [ img [ class "profile-img img-thumbnail m-b-1", src profile.avatar_url ]
                                                     []
-                                                , a [ class "btn btn-sm btn-outline-primary btn-block m-t-1", href profile.name, target "_blank" ]
+                                                , a [ class "btn btn-sm btn-outline-primary btn-block m-t-1", href profile.html_url, target "_blank" ]
                                                     [ text "View Profile" ]
                                                 ]
                                             , div [ class "col-xl-8" ]
