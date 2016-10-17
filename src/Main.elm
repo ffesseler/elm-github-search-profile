@@ -6,7 +6,7 @@ import Html.Events exposing (onInput)
 import Html.App as App
 import Http
 import Json.Decode as Decode
-import Json.Decode.Pipeline exposing (required, decode)
+import Json.Decode.Pipeline exposing (required, decode, nullable)
 import Task
 import String exposing (length)
 
@@ -19,6 +19,7 @@ type alias Model =
     { githubName : String
     , credentials : Credentials
     , profile : Maybe GithubProfile
+    , repositories : List Repository
     , error : Maybe Http.Error
     }
 
@@ -34,16 +35,20 @@ type alias GithubProfile =
     , repos_url : String
     , avatar_url : String
     , login : String
-    , location : String
-    , email : String
-    , blog : String
     , created_at : String
+    , location : String
+    , email : Maybe String
+    , blog : Maybe String
     , html_url : String
     }
 
 
 type alias Repository =
     { name : String
+    , watchers : Int
+    , forks : Int
+    , description : Maybe String
+    , html_url : String
     }
 
 
@@ -51,10 +56,12 @@ type Msg
     = SearchUser String
     | FetchUserDone (GithubProfile)
     | FetchUserFail Http.Error
+    | FetchRepositoriesDone (List Repository)
+    | FetchRepositoriesFail Http.Error
 
 
 init githubName credentials =
-    ( Model githubName credentials Nothing Nothing, Cmd.none )
+    ( Model githubName credentials Nothing [] Nothing, Cmd.none )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -67,10 +74,21 @@ update msg model =
                 ( { model | error = Nothing, profile = Nothing }, Cmd.none )
 
         FetchUserDone profile ->
-            ( { model | profile = Just profile, error = Nothing }, Cmd.none )
+            ( { model | profile = Just profile, error = Nothing }, fetchGithubUserRepositories profile.login model.credentials )
+
+        FetchRepositoriesDone repositories ->
+            ( { model | repositories = repositories }, Cmd.none )
 
         FetchUserFail error ->
             Debug.log "fail" ( { model | error = Just error }, Cmd.none )
+
+        FetchRepositoriesFail error ->
+            Debug.log "fail" ( { model | error = Just error }, Cmd.none )
+
+
+fetchGithubUserRepositories githubName credentials =
+    Http.get repositoriesDecoder (fetchGithubUserRepositoriesUrl githubName credentials)
+        |> Task.perform FetchRepositoriesFail FetchRepositoriesDone
 
 
 fetchGithubUser githubName credentials =
@@ -83,6 +101,11 @@ fetchGithubUserUrl name credentials =
     "http://api.github.com/users/" ++ name ++ "?client_id=" ++ credentials.clientId ++ "&client_secret=" ++ credentials.clientSecret
 
 
+fetchGithubUserRepositoriesUrl : String -> Credentials -> String
+fetchGithubUserRepositoriesUrl name credentials =
+    "http://api.github.com/users/" ++ name ++ "/repos?client_id=" ++ credentials.clientId ++ "&client_secret=" ++ credentials.clientSecret
+
+
 profileDecoder : Decode.Decoder (GithubProfile)
 profileDecoder =
     decode GithubProfile
@@ -92,8 +115,23 @@ profileDecoder =
         |> required "login" Decode.string
         |> required "created_at" Decode.string
         |> required "location" Decode.string
-        |> required "email" Decode.string
-        |> required "blog" Decode.string
+        |> required "email" (nullable Decode.string)
+        |> required "blog" (nullable Decode.string)
+        |> required "html_url" Decode.string
+
+
+repositoriesDecoder : Decode.Decoder (List Repository)
+repositoriesDecoder =
+    Decode.list repositoryDecoder
+
+
+repositoryDecoder : Decode.Decoder (Repository)
+repositoryDecoder =
+    decode Repository
+        |> required "name" Decode.string
+        |> required "watchers" Decode.int
+        |> required "forks" Decode.int
+        |> required "description" (nullable Decode.string)
         |> required "html_url" Decode.string
 
 
@@ -138,46 +176,70 @@ profile model =
                         ]
 
                 Just profile ->
-                    div [ class "row" ]
-                        [ div [ class "col-md-5" ]
-                            [ div []
-                                [ div [ class "card" ]
-                                    [ h4 [ class "card-header" ]
-                                        [ text profile.name ]
-                                    , div [ class "card-block" ]
-                                        [ div [ class "row" ]
-                                            [ div [ class "col-xl-4 m-b-1" ]
-                                                [ img [ class "profile-img img-thumbnail m-b-1", src profile.avatar_url ]
-                                                    []
-                                                , a [ class "btn btn-sm btn-outline-primary btn-block m-t-1", href profile.html_url, target "_blank" ]
-                                                    [ text "View Profile" ]
-                                                ]
-                                            , div [ class "col-xl-8" ]
-                                                [ ul [ class "list-group" ]
-                                                    [ li [ class "list-group-item" ]
-                                                        [ b []
-                                                            [ text "Username: " ]
-                                                        , text profile.login
-                                                        ]
-                                                    , li [ class "list-group-item" ]
-                                                        [ b []
-                                                            [ text "Location: " ]
-                                                        , text profile.location
-                                                        ]
-                                                    , li [ class "list-group-item" ]
-                                                        [ b []
-                                                            [ text "E-Mail: " ]
-                                                        , text profile.email
-                                                        ]
-                                                    , li [ class "list-group-item" ]
-                                                        [ b []
-                                                            [ text "Blog Link: " ]
-                                                        , text profile.blog
-                                                        ]
-                                                    , li [ class "list-group-item" ]
-                                                        [ b []
-                                                            [ text "Member Since: " ]
-                                                        , text profile.created_at
+                    let
+                        email =
+                            (\value ->
+                                case value of
+                                    Just str ->
+                                        str
+
+                                    Nothing ->
+                                        ""
+                            )
+                                profile.email
+
+                        blog =
+                            (\value ->
+                                case value of
+                                    Just str ->
+                                        str
+
+                                    Nothing ->
+                                        ""
+                            )
+                                profile.blog
+                    in
+                        div [ class "row" ]
+                            [ div [ class "col-md-5" ]
+                                [ div []
+                                    [ div [ class "card" ]
+                                        [ h4 [ class "card-header" ]
+                                            [ text profile.name ]
+                                        , div [ class "card-block" ]
+                                            [ div [ class "row" ]
+                                                [ div [ class "col-xl-4 m-b-1" ]
+                                                    [ img [ class "profile-img img-thumbnail m-b-1", src profile.avatar_url ]
+                                                        []
+                                                    , a [ class "btn btn-sm btn-outline-primary btn-block m-t-1", href profile.html_url, target "_blank" ]
+                                                        [ text "View Profile" ]
+                                                    ]
+                                                , div [ class "col-xl-8" ]
+                                                    [ ul [ class "list-group" ]
+                                                        [ li [ class "list-group-item" ]
+                                                            [ b []
+                                                                [ text "Username: " ]
+                                                            , text profile.login
+                                                            ]
+                                                        , li [ class "list-group-item" ]
+                                                            [ b []
+                                                                [ text "Location: " ]
+                                                            , text profile.location
+                                                            ]
+                                                        , li [ class "list-group-item" ]
+                                                            [ b []
+                                                                [ text "E-Mail: " ]
+                                                            , text email
+                                                            ]
+                                                        , li [ class "list-group-item" ]
+                                                            [ b []
+                                                                [ text "Blog Link: " ]
+                                                            , text blog
+                                                            ]
+                                                        , li [ class "list-group-item" ]
+                                                            [ b []
+                                                                [ text "Member Since: " ]
+                                                            , text profile.created_at
+                                                            ]
                                                         ]
                                                     ]
                                                 ]
@@ -185,8 +247,49 @@ profile model =
                                         ]
                                     ]
                                 ]
+                            , div [ class "col-md-7" ]
+                                [ div []
+                                    [ div [ class "card" ]
+                                        [ h5 [ class "card-header" ]
+                                            [ text "Repos" ]
+                                        , div [ class "card-block" ]
+                                            [ repositoriesViewList model
+                                            ]
+                                        ]
+                                    ]
+                                ]
                             ]
-                        ]
+
+
+repositoriesViewList model =
+    model.repositories
+        |> List.map repositoryView
+        |> div [ class "list-group" ]
+
+
+repositoryView repository =
+    let
+        description =
+            (\value ->
+                case value of
+                    Nothing ->
+                        ""
+
+                    Just a ->
+                        a
+            )
+                repository.description
+    in
+        a [ class "list-group-item list-group-item-action", href repository.html_url, target "_blank" ]
+            [ span [ class "tag tag-info pull-xs-right" ]
+                [ text (toString repository.watchers ++ " Watchers") ]
+            , span [ class "tag tag-success pull-xs-right m-r-05" ]
+                [ text (toString repository.forks ++ " Forks") ]
+            , h6 [ class "list-group-item-heading" ]
+                [ text repository.name ]
+            , p [ class "list-group-item-text" ]
+                [ text description ]
+            ]
 
 
 searchform model =
