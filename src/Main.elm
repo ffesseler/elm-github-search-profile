@@ -1,6 +1,6 @@
 module Main exposing (..)
 
-import Html exposing (text, Html, nav, i, a, li, div, input, form)
+import Html exposing (text, Html, nav, i, a, li, div, input, form, b, p, h5)
 import Html.Attributes exposing (class, attribute, href, type', placeholder, id, name)
 import Html.App as App
 
@@ -31,7 +31,25 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    searchform model
+    div []
+        [ profile model
+        , searchform model
+        ]
+
+
+profile model =
+    div [ class "m-x-auto" ]
+        [ div [ class "starter-template text-xs-center" ]
+            [ h5 []
+                [ text "Search any user" ]
+            , p [ class "lead" ]
+                [ text "Please enter a "
+                , b []
+                    [ text "username" ]
+                , text "."
+                ]
+            ]
+        ]
 
 
 searchform model =
