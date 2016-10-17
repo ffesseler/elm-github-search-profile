@@ -1,14 +1,13 @@
+This project is a elm version of [Angular 2 Github Search Profile](https://github.com/tahaipek/Angular-2-Github-Search-Profile)
+
+A demo of the angular 2 version is available [here](https://tahaipek.github.io/Angular-2-Github-Search-Profile/)
+
 This project was bootstrapped with [Create Elm App](https://github.com/halfzebra/create-elm-app).
 
-Below you will find some information on how to perform common tasks.  
+Below you will find some information on how to perform common tasks.
 You can find the most recent version of this guide [here](https://github.com/halfzebra/create-elm-app/blob/master/template/README.md).
 
 ## Table of Contents
-- [Sending feedback](#sending-feedback)
-- [Folder structure](#folder-structure)
-- [Installing Elm packages](#installing-elm-packages)
-- [Installing JavaScript packages](#installing-js-packages)
-- [Testing](#testing)
 - [Available scripts](#available-scripts)
   - [elm-app build](#elm-app-build)
   - [elm-app start](#elm-app-start)
@@ -20,70 +19,20 @@ You can find the most recent version of this guide [here](https://github.com/hal
     - [reactor](#reactor)
 - [IDE setup for Hot Module Replacement](#ide-setup-for-hot-module-replacement)
 
-## Sending feedback
-You are very velcome with any [feedback](https://github.com/halfzebra/create-elm-app/issues)
-
-## Installing Elm packages
-
-```sh
-elm-app package install <package-name>
-```
-
-## Installing JavaScript packages
-
-To use JavaScript packages from npm, you'll need to add a `package.json`, install the dependencies and you're ready to go.
-
-```sh
-npm init -y # Add package.json
-npm install --save-dev pouchdb-browser # Install library from npm
-```
-
-```js
-// Use in your JS code
-var PouchDB = require('pouchdb-browser');
-var db = new PouchDB('mydb');
-```
-
-## Folder structure
-```
-my-app/
-  README.md
-  elm-package.json
-  src/
-    favicon.ico
-    index.html
-    index.js
-    main.css
-    Main.elm
-```
-For the project to build, these files must exist with exact filenames:
-
-- `src/index.html` is the page template;
-- `src/favicon.ico` is the icon you see in the browser tab;
-- `src/index.js` is the JavaScript entry point.
-
-You can delete or rename the other files.
-
-You may create subdirectories inside src.
-
-## Testing
-We recommend using [node-test-runner](https://github.com/rtfeldman/node-test-runner) for testing.
-
-It is a command line tool, which helps you to start writing unit tests for your Elm code.
 
 ## Available scripts
 In the project directory you can run:
 ### `elm-app build`
-Builds the app for production to the `dist` folder.  
+Builds the app for production to the `dist` folder.
 
-The build is minified and the filenames include the hashes.  
+The build is minified and the filenames include the hashes.
 Your app is ready to be deployed!
 
 ### `elm-app start`
-Runs the app in the development mode.  
+Runs the app in the development mode.
 Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
-The page will reload if you make edits.  
+The page will reload if you make edits.
 You will also see any lint errors in the console.
 
 ### `elm-app eject`
