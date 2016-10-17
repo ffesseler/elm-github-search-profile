@@ -1,6 +1,7 @@
 module Main exposing (..)
 
-import Html exposing (text, Html)
+import Html exposing (text, Html, nav, i, a, li, div, input, form)
+import Html.Attributes exposing (class, attribute, href, type', placeholder, id, name)
 import Html.App as App
 
 
@@ -30,4 +31,47 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    text "Hello World"
+    searchform model
+
+
+searchform model =
+    nav [ class "navbar navbar-fixed-top navbar-dark bg-inverse" ]
+        [ div [ class "row pull-xs-right" ]
+            [ div [ class "col-md-3 hidden-md-down" ]
+                [ a [ class "navbar-brand", href "#" ]
+                    [ text "Github Search Profile" ]
+                ]
+            , div [ class " col-md-6" ]
+                [ form [ id "searchForm" ]
+                    [ div [ class "form-group" ]
+                        [ div [ class "input-group" ]
+                            [ input [ class "form-control", name "username", placeholder "Enter A Github Username...", type' "text" ]
+                                []
+                            , div [ class "input-group-addon" ]
+                                [ i [ attribute "aria-hidden" "true", class "fa fa-keyboard-o" ]
+                                    []
+                                ]
+                            ]
+                        ]
+                    ]
+                ]
+            , div [ class "col-md-3" ]
+                [ nav [ class "nav navbar-nav  pull-xs-right" ]
+                    [ li [ class "nav-item" ]
+                        [ a [ class "nav-link", href "https://twitter.com/_tipek" ]
+                            [ i [ attribute "aria-hidden" "true", class "fa fa-twitter" ]
+                                []
+                            , text "Twitter"
+                            ]
+                        ]
+                    , li [ class "nav-item" ]
+                        [ a [ class "nav-link", href "https://github.com/tahaipek" ]
+                            [ i [ attribute "aria-hidden" "true", class "fa fa-github" ]
+                                []
+                            , text "Github"
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        ]
