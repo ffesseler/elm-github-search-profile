@@ -114,12 +114,20 @@ fetchGithubUser githubName credentials =
 
 fetchGithubUserUrl : String -> Credentials -> String
 fetchGithubUserUrl name credentials =
-    "http://api.github.com/users/" ++ name ++ "?client_id=" ++ credentials.clientId ++ "&client_secret=" ++ credentials.clientSecret
+    githubApiBaseUrl name ++ githubApiSecretParams credentials
 
 
 fetchGithubUserRepositoriesUrl : String -> Credentials -> String
 fetchGithubUserRepositoriesUrl name credentials =
-    "http://api.github.com/users/" ++ name ++ "/repos?client_id=" ++ credentials.clientId ++ "&client_secret=" ++ credentials.clientSecret
+    githubApiBaseUrl name ++ "/repos" ++ githubApiSecretParams credentials
+
+
+githubApiBaseUrl name =
+    "http://api.github.com/users/" ++ name
+
+
+githubApiSecretParams credentials =
+    "?client_id=" ++ credentials.clientId ++ "&client_secret=" ++ credentials.clientSecret
 
 
 profileDecoder : Decode.Decoder (GithubProfile)
