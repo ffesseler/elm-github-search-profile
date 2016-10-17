@@ -40,6 +40,10 @@ type alias GithubProfile =
     , email : Maybe String
     , blog : Maybe String
     , html_url : String
+    , public_repos : Int
+    , public_gists : Int
+    , following : Int
+    , followers : Int
     }
 
 
@@ -118,6 +122,10 @@ profileDecoder =
         |> required "email" (nullable Decode.string)
         |> required "blog" (nullable Decode.string)
         |> required "html_url" Decode.string
+        |> required "public_repos" Decode.int
+        |> required "public_gists" Decode.int
+        |> required "followers" Decode.int
+        |> required "following" Decode.int
 
 
 repositoriesDecoder : Decode.Decoder (List Repository)
@@ -242,6 +250,16 @@ profile model =
                                                             ]
                                                         ]
                                                     ]
+                                                ]
+                                            , div [ class "status m-t-1" ]
+                                                [ span [ class "p-a-05 bg-info text-xs-center" ]
+                                                    [ text (toString profile.public_repos ++ " Public Repos ") ]
+                                                , span [ class "p-a-05 bg-primary m-t-1 text-xs-center" ]
+                                                    [ text (toString profile.public_gists ++ " Public Gists ") ]
+                                                , span [ class "p-a-05 bg-danger m-t-1 text-xs-center" ]
+                                                    [ text (toString profile.followers ++ " Followers ") ]
+                                                , span [ class "p-a-05 bg-inverse m-t-1 text-xs-center" ]
+                                                    [ text (toString profile.following ++ " Followings ") ]
                                                 ]
                                             ]
                                         ]
