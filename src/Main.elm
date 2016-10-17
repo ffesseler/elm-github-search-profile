@@ -7,6 +7,7 @@ import Html.App as App
 import Http
 import Json.Decode as Decode exposing ((:=))
 import Task
+import String exposing (length)
 
 
 main =
@@ -52,10 +53,13 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         SearchUser githubName ->
-            ( model, fetchGithubUser githubName model.credentials )
+            if length githubName > 0 then
+                ( model, fetchGithubUser githubName model.credentials )
+            else
+                ( { model | error = Nothing, profile = Nothing }, Cmd.none )
 
         FetchUserDone profile ->
-            ( { model | profile = Just profile }, Cmd.none )
+            ( { model | profile = Just profile, error = Nothing }, Cmd.none )
 
         FetchUserFail error ->
             Debug.log "fail" ( { model | error = Just error }, Cmd.none )
@@ -87,14 +91,14 @@ view model =
 
 
 profile model =
-    case model.profile of
-        Nothing ->
+    case model.error of
+        Just error ->
             div [ class "m-x-auto" ]
                 [ div [ class "starter-template text-xs-center" ]
                     [ h5 []
-                        [ text "Search any user" ]
+                        [ text "User Profile not found." ]
                     , p [ class "lead" ]
-                        [ text "Please enter a "
+                        [ text "Please enter a different "
                         , b []
                             [ text "username" ]
                         , text "."
@@ -102,10 +106,26 @@ profile model =
                     ]
                 ]
 
-        Just profile ->
-            div []
-                [ h5 [] [ text profile.name ]
-                ]
+        Nothing ->
+            case model.profile of
+                Nothing ->
+                    div [ class "m-x-auto" ]
+                        [ div [ class "starter-template text-xs-center" ]
+                            [ h5 []
+                                [ text "Search any user" ]
+                            , p [ class "lead" ]
+                                [ text "Please enter a "
+                                , b []
+                                    [ text "username" ]
+                                , text "."
+                                ]
+                            ]
+                        ]
+
+                Just profile ->
+                    div []
+                        [ h5 [] [ text profile.name ]
+                        ]
 
 
 searchform model =
