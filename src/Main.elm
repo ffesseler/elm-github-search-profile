@@ -11,6 +11,7 @@ import Task
 import String exposing (length)
 
 
+main : Program Never
 main =
     App.program { init = init "" (Credentials "" ""), update = update, view = view, subscriptions = \_ -> Sub.none }
 
@@ -72,6 +73,7 @@ type Msg
 -- INIT
 
 
+init : String -> Credentials -> ( Model, Cmd Msg )
 init githubName credentials =
     ( Model githubName credentials Nothing [] Nothing, Cmd.none )
 
@@ -102,11 +104,13 @@ update msg model =
             Debug.log "fail" ( { model | error = Just error }, Cmd.none )
 
 
+fetchGithubUserRepositories : String -> Credentials -> Cmd Msg
 fetchGithubUserRepositories githubName credentials =
     Http.get repositoriesDecoder (fetchGithubUserRepositoriesUrl githubName credentials)
         |> Task.perform FetchRepositoriesFail FetchRepositoriesDone
 
 
+fetchGithubUser : String -> Credentials -> Cmd Msg
 fetchGithubUser githubName credentials =
     Http.get profileDecoder (fetchGithubUserUrl githubName credentials)
         |> Task.perform FetchUserFail FetchUserDone
@@ -122,10 +126,12 @@ fetchGithubUserRepositoriesUrl name credentials =
     githubApiBaseUrl name ++ "/repos" ++ githubApiSecretParams credentials
 
 
+githubApiBaseUrl : String -> String
 githubApiBaseUrl name =
     "http://api.github.com/users/" ++ name
 
 
+githubApiSecretParams : Credentials -> String
 githubApiSecretParams credentials =
     "?client_id=" ++ credentials.clientId ++ "&client_secret=" ++ credentials.clientSecret
 
@@ -175,6 +181,7 @@ view model =
         ]
 
 
+profile : Model -> Html Msg
 profile model =
     case model.error of
         Just error ->
@@ -189,6 +196,7 @@ profile model =
                     displayProfile profile model
 
 
+userProfileNotFound : Html Msg
 userProfileNotFound =
     div [ class "m-x-auto" ]
         [ div [ class "starter-template text-xs-center" ]
@@ -204,6 +212,7 @@ userProfileNotFound =
         ]
 
 
+noInputYet : Html Msg
 noInputYet =
     div [ class "m-x-auto" ]
         [ div [ class "starter-template text-xs-center" ]
@@ -219,6 +228,7 @@ noInputYet =
         ]
 
 
+displayProfile : GithubProfile -> Model -> Html Msg
 displayProfile profile model =
     div [ class "row" ]
         [ div [ class "col-md-5" ]
@@ -292,12 +302,14 @@ displayProfile profile model =
         ]
 
 
+repositoriesViewList : Model -> Html Msg
 repositoriesViewList model =
     model.repositories
         |> List.map repositoryView
         |> div [ class "list-group" ]
 
 
+repositoryView : Repository -> Html Msg
 repositoryView repository =
     a [ class "list-group-item list-group-item-action", href repository.html_url, target "_blank" ]
         [ span [ class "tag tag-info pull-xs-right" ]
@@ -311,6 +323,7 @@ repositoryView repository =
         ]
 
 
+searchform : Model -> Html Msg
 searchform model =
     nav [ class "navbar navbar-fixed-top navbar-dark bg-inverse" ]
         [ div [ class "row pull-xs-right" ]
