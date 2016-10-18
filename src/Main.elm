@@ -229,76 +229,61 @@ noInputYet =
 
 displayProfile : GithubProfile -> Model -> Html Msg
 displayProfile profile model =
-    div [ class "row" ]
-        [ div [ class "col-md-5" ]
-            [ div []
-                [ div [ class "card" ]
-                    [ h4 [ class "card-header" ]
-                        [ text profile.name ]
-                    , div [ class "card-block" ]
-                        [ div [ class "row" ]
-                            [ div [ class "col-xl-4 m-b-1" ]
-                                [ img [ class "profile-img img-thumbnail m-b-1", src profile.avatar_url ]
-                                    []
-                                , a [ class "btn btn-sm btn-outline-primary btn-block m-t-1", href profile.html_url, target "_blank" ]
-                                    [ text "View Profile" ]
-                                ]
-                            , div [ class "col-xl-8" ]
-                                [ ul [ class "list-group" ]
-                                    [ li [ class "list-group-item" ]
-                                        [ b []
-                                            [ text "Username: " ]
-                                        , text profile.login
-                                        ]
-                                    , li [ class "list-group-item" ]
-                                        [ b []
-                                            [ text "Location: " ]
-                                        , text profile.location
-                                        ]
-                                    , li [ class "list-group-item" ]
-                                        [ b []
-                                            [ text "E-Mail: " ]
-                                        , text (Maybe.withDefault "" profile.email)
-                                        ]
-                                    , li [ class "list-group-item" ]
-                                        [ b []
-                                            [ text "Blog Link: " ]
-                                        , text (Maybe.withDefault "" profile.blog)
-                                        ]
-                                    , li [ class "list-group-item" ]
-                                        [ b []
-                                            [ text "Member Since: " ]
-                                        , text profile.created_at
-                                        ]
+    let
+        listGroupItem ( title, value ) =
+            li [ class "list-group-item" ] [ b [] [ text title ], text value ]
+    in
+        div [ class "row" ]
+            [ div [ class "col-md-5" ]
+                [ div []
+                    [ div [ class "card" ]
+                        [ h4 [ class "card-header" ]
+                            [ text profile.name ]
+                        , div [ class "card-block" ]
+                            [ div [ class "row" ]
+                                [ div [ class "col-xl-4 m-b-1" ]
+                                    [ img [ class "profile-img img-thumbnail m-b-1", src profile.avatar_url ]
+                                        []
+                                    , a [ class "btn btn-sm btn-outline-primary btn-block m-t-1", href profile.html_url, target "_blank" ]
+                                        [ text "View Profile" ]
+                                    ]
+                                , div [ class "col-xl-8" ]
+                                    [ ul [ class "list-group" ] <|
+                                        List.map listGroupItem
+                                            [ ( "Username: ", profile.name )
+                                            , ( "Location: ", profile.location )
+                                            , ( "E-Mail: ", Maybe.withDefault "" profile.email )
+                                            , ( "Blog Link: ", Maybe.withDefault "" profile.blog )
+                                            , ( "Member Since: ", profile.created_at )
+                                            ]
                                     ]
                                 ]
+                            , div [ class "status m-t-1" ]
+                                [ span [ class "p-a-05 bg-info text-xs-center" ]
+                                    [ text (toString profile.public_repos ++ " Public Repos ") ]
+                                , span [ class "p-a-05 bg-primary m-t-1 text-xs-center" ]
+                                    [ text (toString profile.public_gists ++ " Public Gists ") ]
+                                , span [ class "p-a-05 bg-danger m-t-1 text-xs-center" ]
+                                    [ text (toString profile.followers ++ " Followers ") ]
+                                , span [ class "p-a-05 bg-inverse m-t-1 text-xs-center" ]
+                                    [ text (toString profile.following ++ " Followings ") ]
+                                ]
                             ]
-                        , div [ class "status m-t-1" ]
-                            [ span [ class "p-a-05 bg-info text-xs-center" ]
-                                [ text (toString profile.public_repos ++ " Public Repos ") ]
-                            , span [ class "p-a-05 bg-primary m-t-1 text-xs-center" ]
-                                [ text (toString profile.public_gists ++ " Public Gists ") ]
-                            , span [ class "p-a-05 bg-danger m-t-1 text-xs-center" ]
-                                [ text (toString profile.followers ++ " Followers ") ]
-                            , span [ class "p-a-05 bg-inverse m-t-1 text-xs-center" ]
-                                [ text (toString profile.following ++ " Followings ") ]
+                        ]
+                    ]
+                ]
+            , div [ class "col-md-7" ]
+                [ div []
+                    [ div [ class "card" ]
+                        [ h5 [ class "card-header" ]
+                            [ text "Repos" ]
+                        , div [ class "card-block" ]
+                            [ repositoriesViewList model
                             ]
                         ]
                     ]
                 ]
             ]
-        , div [ class "col-md-7" ]
-            [ div []
-                [ div [ class "card" ]
-                    [ h5 [ class "card-header" ]
-                        [ text "Repos" ]
-                    , div [ class "card-block" ]
-                        [ repositoriesViewList model
-                        ]
-                    ]
-                ]
-            ]
-        ]
 
 
 repositoriesViewList : Model -> Html Msg
