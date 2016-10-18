@@ -13,7 +13,7 @@ import String exposing (length)
 
 main : Program Never
 main =
-    App.program { init = init "" (Credentials "" ""), update = update, view = view, subscriptions = \_ -> Sub.none }
+    App.program { init = init (Credentials "" ""), update = update, view = view, subscriptions = \_ -> Sub.none }
 
 
 
@@ -21,8 +21,7 @@ main =
 
 
 type alias Model =
-    { githubName : String
-    , credentials : Credentials
+    { credentials : Credentials
     , profile : Maybe GithubProfile
     , repositories : List Repository
     , error : Maybe Http.Error
@@ -73,9 +72,9 @@ type Msg
 -- INIT
 
 
-init : String -> Credentials -> ( Model, Cmd Msg )
-init githubName credentials =
-    ( Model githubName credentials Nothing [] Nothing, Cmd.none )
+init : Credentials -> ( Model, Cmd Msg )
+init credentials =
+    ( Model credentials Nothing [] Nothing, Cmd.none )
 
 
 
